@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec AI Chatbot</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 3D Background Canvas -->
+    <canvas id="bg3d" class="background"></canvas>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <h1>CyberSec AI</h1>
+            </div>
+            <div class="security-toggle">
+                <button id="secureToggle" class="toggle-btn">
+                    <i class="fas fa-lock-open"></i>
+                    <span>Secure Chat</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Security Tip -->
+        <div class="security-tip">
+            <i class="fas fa-lightbulb"></i>
+            <span id="securityTip">💡 Security Tip: Always use strong, unique passwords for each account and enable two-factor authentication when available.</span>
+        </div>
+
+        <!-- Profile + Chat Container -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="bot-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="chat-info">
+                    <h3>CyberSec Assistant</h3>
+                    <div class="status">
+                        <div class="status-dot"></div>
+                        <span>Online</span>
+                    </div>
+                </div>
+                <div class="profile" id="profile">
+                    <div class="profile-avatar"><i class="fas fa-user"></i></div>
+                    <div class="profile-details">
+                        <div id="profileName">User</div>
+                        <div id="profileEmail" class="muted"></div>
+                    </div>
+                    <button id="logoutButton" class="action-btn" title="Logout"><i class="fas fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chatMessages">
+                <!-- Welcome message will be added here -->
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span class="typing-text">CyberSec AI is thinking...</span>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="chat-input-container">
+                <div class="input-wrapper">
+                    <input type="text" id="messageInput" placeholder="Login to start chatting..." maxlength="500" disabled>
+                    <button id="sendButton" class="send-btn" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="input-actions">
+                    <button id="clearChat" class="action-btn">
+                        <i class="fas fa-trash"></i>
+                        Clear Chat
+                    </button>
+                    <div class="char-count">
+                        <span id="charCount">0</span>/500
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Initializing CyberSec AI...</p>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-cog"></i> Profile Settings</h2>
+                <button class="close-btn" id="closeProfileModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-section">
+                    <h3>Current Profile</h3>
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <label>Username:</label>
+                            <span id="currentUsername">admin</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Email:</label>
+                            <span id="currentEmail">admin</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h3>Account Management</h3>
+                    <div class="profile-actions">
+                        <button id="changePasswordBtn" class="action-btn">
+                            <i class="fas fa-key"></i>
+                            Change Password
+                        </button>
+                        <button id="changeUsernameBtn" class="action-btn">
+                            <i class="fas fa-user-edit"></i>
+                            Change Username
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-key"></i> Change Password</h2>
+                <button class="close-btn" id="closePasswordModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-form">
+                    <div class="form-group">
+                        <label for="currentPasswordChange">Current Password:</label>
+                        <div class="password-container">
+                            <input type="password" id="currentPasswordChange" placeholder="Enter current password">
+                            <button type="button" id="toggleCurrentPasswordChange" class="password-toggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPasswordChange">New Password:</label>
+                        <div class="password-container">
+                            <input type="password" id="newPasswordChange" placeholder="Enter new password">
+                            <button type="button" id="toggleNewPasswordChange" class="password-toggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <div class="strength-text" id="strengthText">Enter a password</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPasswordChange">Confirm New Password:</label>
+                        <div class="password-container">
+                            <input type="password" id="confirmPasswordChange" placeholder="Confirm new password">
+                            <button type="button" id="toggleConfirmPasswordChange" class="password-toggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="updatePassword" class="btn-primary">Update Password</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Username Change Modal -->
+    <div class="modal" id="usernameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-edit"></i> Change Username</h2>
+                <button class="close-btn" id="closeUsernameModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-form">
+                    <div class="form-group">
+                        <label for="newUsernameChange">New Username:</label>
+                        <input type="text" id="newUsernameChange" placeholder="Enter new username">
+                    </div>
+                    <div class="form-group">
+                        <label for="currentPasswordUsername">Current Password:</label>
+                        <div class="password-container">
+                            <input type="password" id="currentPasswordUsername" placeholder="Enter current password">
+                            <button type="button" id="toggleCurrentPasswordUsername" class="password-toggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="updateUsername" class="btn-primary">Update Username</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

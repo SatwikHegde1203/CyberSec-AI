@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CyberSec AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <canvas id="bg3d" class="background"></canvas>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <h1>CyberSec AI</h1>
+            </div>
+        </header>
+        <div class="login-container" style="display:flex">
+            <div class="login-card">
+                <h2><i class="fas fa-user-shield"></i> Sign in</h2>
+                <p class="login-sub">Use credentials to continue</p>
+                <div class="login-fields">
+                    <input type="text" id="loginUser" placeholder="User ID" autocomplete="username">
+                    <div class="password-container">
+                        <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
+                        <button type="button" id="togglePassword" class="password-toggle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="login-options">
+                        <label class="remember-me">
+                            <input type="checkbox" id="rememberMe">
+                            <span>Remember me</span>
+                        </label>
+                    </div>
+                    <button id="loginButton" class="btn-primary">Login</button>
+                </div>
+                <p class="login-hint">Enter your credentials to continue</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+    <script>
+    // Minimal login script
+    function init3D() {
+        if (!window.THREE) return;
+        const canvas = document.getElementById('bg3d');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 50;
+        const count = 600;
+        const geo = new THREE.BufferGeometry();
+        const pos = new Float32Array(count * 3);
+        for (let i=0;i<count*3;i++) pos[i] = (Math.random()-0.5)*200;
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        const mat = new THREE.PointsMaterial({ color: 0xa78bfa, size: 0.7, transparent: true, opacity: 0.8 });
+        const points = new THREE.Points(geo, mat);
+        scene.add(points);
+        function resize(){
+            const w = window.innerWidth, h = window.innerHeight;
+            renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();
+        }
+        window.addEventListener('resize', resize); resize();
+        function anim(){ requestAnimationFrame(anim); points.rotation.y += 0.0008; renderer.render(scene,camera); }
+        anim();
+    }
+    init3D();
+
+    // Load saved credentials on page load
+    function loadSavedCredentials() {
+        const savedEmail = localStorage.getItem('remembered_email');
+        const savedPassword = localStorage.getItem('remembered_password');
+        const rememberMe = localStorage.getItem('remember_me') === 'true';
+        
+        if (rememberMe && savedEmail && savedPassword) {
+            document.getElementById('loginUser').value = savedEmail;
+            document.getElementById('loginPass').value = savedPassword;
+            document.getElementById('rememberMe').checked = true;
+        }
+    }
+
+    async function login() {
+        const email = document.getElementById('loginUser').value.trim();
+        const password = document.getElementById('loginPass').value.trim();
+        const rememberMe = document.getElementById('rememberMe').checked;
+        
+        if (!email || !password) {
+            alert('Please enter both username and password');
+            return;
+        }
+        
+        const loginButton = document.getElementById('loginButton');
+        const originalText = loginButton.textContent;
+        loginButton.textContent = 'Logging in...';
+        loginButton.disabled = true;
+        
+        try {
+            const res = await fetch('/auth/login', {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || `Server error: ${res.status}`);
+            }
+            
+            const data = await res.json();
+            localStorage.setItem('auth_token', data.token);
+            localStorage.setItem('auth_profile', JSON.stringify(data.profile));
+            
+            // Handle remember me
+            if (rememberMe) {
+                localStorage.setItem('remembered_email', email);
+                localStorage.setItem('remembered_password', password);
+                localStorage.setItem('remember_me', 'true');
+            } else {
+                localStorage.removeItem('remembered_email');
+                localStorage.removeItem('remembered_password');
+                localStorage.removeItem('remember_me');
+            }
+            
+            location.href = 'index.html';
+        } catch (e) {
+            console.error('Login error:', e);
+            let errorMessage = 'Login failed';
+            
+            if (e.message.includes('Failed to fetch') || e.message.includes('Load failed')) {
+                errorMessage = 'Cannot connect to server. Please make sure the server is running on port 3000.';
+            } else if (e.message.includes('Server error: 401')) {
+                errorMessage = 'Invalid username or password';
+            } else if (e.message.includes('Server error: 500')) {
+                errorMessage = 'Server error. Please check server logs.';
+            } else {
+                errorMessage = e.message;
+            }
+            
+            alert(errorMessage);
+        } finally {
+            loginButton.textContent = originalText;
+            loginButton.disabled = false;
+        }
+    }
+
+    // Load saved credentials when page loads
+    loadSavedCredentials();
+    // Password toggle functionality
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('loginPass');
+        const toggleIcon = this.querySelector('i');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.className = 'fas fa-eye-slash';
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.className = 'fas fa-eye';
+        }
+    });
+
+    document.getElementById('loginButton').addEventListener('click', login);
+    ['keypress','keyup'].forEach(evt => {
+        document.getElementById('loginPass').addEventListener(evt, (e)=>{ if(e.key==='Enter') login(); });
+    });
+    </script>
+</body>
+</html>
+
