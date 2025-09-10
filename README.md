@@ -74,3 +74,8 @@ ADMIN_PASSWORD=your_secure_password
 - CORS protection
 - Input validation
 - Secure session management
+
+
+## Results
+
+![Alt text for the image]()
