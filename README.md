@@ -78,4 +78,11 @@ ADMIN_PASSWORD=your_secure_password
 
 ## Results
 
-![Alt text for the image]()
+![Login](https://github.com/SatwikHegde1203/CyberSec-AI/blob/main/login.html)
+![Profile Settings](https://github.com/SatwikHegde1203/CyberSec-AI/blob/main/Profile-settings.png)
+![Change User Name](https://github.com/SatwikHegde1203/CyberSec-AI/blob/main/Change-username.png)
+![Change password](https://github.com/SatwikHegde1203/CyberSec-AI/blob/main/Change-password.png)
+![Bot Home page](https://github.com/SatwikHegde1203/CyberSec-AI/blob/main/Bot-home-page.png)
+![Secure chat mode off](https://github.com/SatwikHegde1203/CyberSec-AI/blob/main/secure-chat-desabled.png)
+![Secure chat mode on](https://github.com/SatwikHegde1203/CyberSec-AI/blob/main/Secure-chat-enabled.png)
+![Working](https://github.com/SatwikHegde1203/CyberSec-AI/blob/main/Working.png)
